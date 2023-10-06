@@ -1,21 +1,26 @@
+# Python Built-in Modules
+import logging
+import os
+from typing import Any, Dict, List
+
 # Third-Party Libraries
 import transformers
 
+logger = logging.getLogger(__name__)
+max_seq_len = 1024
+vocab_uri = "https://huggingface.co/hlm12nli/resolve/main/vocab.json"
+vocab_default_oov = "<unk>"
+
 
 class Hlm12NliTokenizer(transformers.PreTrainedTokenizer):
-    vocab_files_names = {"vocab_file": "vocab.txt"}
-    pretrained_vocab_files_map = {
-        "vocab_file": {
-            "hlm12nli": "https://huggingface.co/roberta-base/resolve/main/vocab.json",
-        }
-    }
-    pretrained_init_configuration = {"hlm12nli": {"do_lower_case": False}}
-    max_model_input_sizes = {
-        "hlm12nli": 512,
-    }
-    model_input_names = ["input_ids", "attention_mask"]
+    vocab_files_names: Dict[str, str] = {"vocab_file": "vocab.txt"}
+    pretrained_vocab_files_map: Dict[Dict[str, Any]] = {"vocab_file": {"hlm12nli": vocab_uri}}
+    pretrained_init_configuration: Dict[Dict[str, Any]] = {"hlm12nli": {"do_lower_case": True}}
+    max_model_input_sizes: Dict[str, Any] = {"hlm12nli": max_seq_len}
+    model_input_names: List[str] = ["input_ids", "attention_mask"]
+    vocab_oov: str
 
-    def __init__(self, vocab_file, **kwargs):
+    def __init__(self, vocab_file, oov_token=vocab_default_oov, **kwargs):
         super().__init__(vocab_file, **kwargs)
         self.vocab = self._load_vocab(vocab_file)
         self.ids_to_tokens = {v: k for k, v in self.vocab.items()}
@@ -24,10 +29,10 @@ class Hlm12NliTokenizer(transformers.PreTrainedTokenizer):
         return text.split()
 
     def _convert_token_to_id(self, token):
-        return self.vocab.get(token, self.vocab["<unk>"])
+        return self.vocab.get(token, self.vocab[self.vocab_oov])
 
     def _convert_id_to_token(self, index):
-        return self.ids_to_tokens.get(index, "<unk>")
+        return self.ids_to_tokens.get(index, self.vocab_oov)
 
     def _load_vocab(self, path):
         with open(path, "r", encoding="utf-8") as f:

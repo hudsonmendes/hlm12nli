@@ -1,6 +1,3 @@
-# Python Built-in Modules
-from typing import List
-
 # Third-Party Libraries
 import torch
 import transformers
@@ -30,13 +27,13 @@ class Hlm12NliEncoder(transformers.PreTrainedModel):
         )
         self.layer_norm = torch.nn.LayerNorm(config.hidden_size)
 
-    def forward(self, x: List[str]) -> torch.Tensor:
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+    ) -> torch.Tensor:
         y = self.embeddings(input_ids)
         y, _ = self.lstm(y)
-        mha_out, _ = self.mha(
-            lstm_out,
-            lstm_out,
-            lstm_out,
-            key_padding_mask=attention_mask,
-        )
-        return mha_out
+        attn, _ = self.mha(y, y, y, key_padding_mask=attention_mask)
+        y = y + attn
+        return y
