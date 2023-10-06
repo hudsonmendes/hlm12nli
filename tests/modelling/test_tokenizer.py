@@ -15,6 +15,16 @@ class TestHlm12NliTokenizer(unittest.TestCase):
         expected_output = ["This", "is", "a", "test", "sentence", "."]
         self.assertEqual(self.tokenizer.tokenize(self.test_sentence), expected_output)
 
+    def test_tokenizer_tokenizes_apostrophe(self):
+        test_sentence = "Hudson's home"
+        expected_output = ["Hudson", "##s", "home"]
+        self.assertEqual(self.tokenizer.tokenize(test_sentence), expected_output)
+
+    def test_tokenizer_tokenizes_hash_symbol(self):
+        test_sentence = "Hudson's home"
+        expected_output = ["Hudson", "s", "home"]
+        self.assertEqual(self.tokenizer.tokenize(test_sentence), expected_output)
+
     def test_tokenizer_converts_token_to_id(self):
         expected_output = 1
         self.assertEqual(self.tokenizer.convert_tokens_to_ids("is"), expected_output)

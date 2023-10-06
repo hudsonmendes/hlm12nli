@@ -1,52 +1,88 @@
 # Python Built-in Modules
-import logging
-import os
-from typing import Any, Dict, List
-
-# Third-Party Libraries
-import transformers
-
-logger = logging.getLogger(__name__)
-max_seq_len = 1024
-vocab_uri = "https://huggingface.co/hlm12nli/resolve/main/vocab.json"
-vocab_default_oov = "<unk>"
+import json
+import pathlib
+from typing import Dict
 
 
-class Hlm12NliTokenizer(transformers.PreTrainedTokenizer):
-    vocab_files_names: Dict[str, str] = {"vocab_file": "vocab.txt"}
-    pretrained_vocab_files_map: Dict[Dict[str, Any]] = {"vocab_file": {"hlm12nli": vocab_uri}}
-    pretrained_init_configuration: Dict[Dict[str, Any]] = {"hlm12nli": {"do_lower_case": True}}
-    max_model_input_sizes: Dict[str, Any] = {"hlm12nli": max_seq_len}
-    model_input_names: List[str] = ["input_ids", "attention_mask"]
-    vocab_oov: str
+class Hlm12NliTokenizer:
+    """
+    Construct a Hlm12Nli tokenizer, implemented using the wordpiece[1] algorithm.
 
-    def __init__(self, vocab_file, oov_token=vocab_default_oov, **kwargs):
-        super().__init__(vocab_file, **kwargs)
-        self.vocab = self._load_vocab(vocab_file)
-        self.ids_to_tokens = {v: k for k, v in self.vocab.items()}
+    :param vocab_file: File containing the vocabulary.
+    :param do_lower_case: Whether or not to lowercase the input when tokenizing.
+    :param unk_token: The token that replaces any other that is out-of-vocabulary.
+    :param pad_token: The token that is used for padding.
+    :param cls_token: The token that is used for the start of a sequence.
 
-    def _tokenize(self, text):
-        return text.split()
+    References:
+        [1] Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V. Le, Mohammad Norouzi, Wolfgang Macherey, Maxim Krikun,
+        Yuan Cao, Qin Gao, Klaus Macherey, Jeff Klingner, Apurva Shah, Melvin Johnson, Xiaobing Liu, Łukasz Kaiser,
+        Stephan Gouws, Yoshikiyo Kato, Taku Kudo, Hideto Kazawa, Keith Stevens, George Kurian, Nishant Patil, Wei Wang,
+        Cliff Young, Jason Smith, Jason Riesa, Alex Rudnick, Oriol Vinyals, Greg Corrado, Macduff Hughes, and
+        Jeffrey Dean. 2016. Google’s Neural Machine Translation System: Bridging the Gap between Human and Machine
+        Translation. CoRR abs/1609.08144, (2016). Retrieved from http://arxiv.org/abs/1609.08144
+    """
 
-    def _convert_token_to_id(self, token):
-        return self.vocab.get(token, self.vocab[self.vocab_oov])
+    vocab: Dict[str, int]
+    do_lower_case: bool
+    token_unk: str
+    token_pad: str
+    token_cls: str
 
-    def _convert_id_to_token(self, index):
-        return self.ids_to_tokens.get(index, self.vocab_oov)
+    def __init__(
+        self,
+        vocab_file: pathlib.Path,
+        do_lower_case=True,
+        unk_token="[UNK]",
+        pad_token="[PAD]",
+        cls_token="[CLS]",
+        **kwargs,
+    ):
+        self.vocab = self.load_vocab(vocab_file)
+        self.do_lower_case = do_lower_case
 
-    def _load_vocab(self, path):
-        with open(path, "r", encoding="utf-8") as f:
-            return {token: i for i, token in enumerate(f.read().splitlines())}
+    @staticmethod
+    def load_vocab(filepath: pathlib.Path) -> Dict[str, int]:
+        with open(filepath, "r", encoding="utf-8") as fh:
+            return json.load(fh)
 
-    def get_vocab(self):
-        return dict(self.vocab, **self.added_tokens_encoder)
+    def tokenize(self, text, split_special_tokens=False):
+        # whitespace tokenisation
+        text = text.strip()
+        if not text:
+            return []
+        tokens = text.split()
 
-    def save_vocabulary(self, save_directory):
-        if not os.path.isdir(save_directory):
-            logger.error("Vocabulary path ({}) should be a directory".format(save_directory))
-            return
-        vocab_file = os.path.join(save_directory, self.vocab_files_names["vocab_file"])
-        with open(vocab_file, "w", encoding="utf-8") as f:
-            for token, token_index in sorted(self.vocab.items(), key=lambda kv: kv[1]):
-                f.write(token + "\n")
-        return (vocab_file,)
+        # wordpiece tokenisation
+        output_tokens = []
+        for token in tokens:
+            chars = list(token)
+            if len(chars) > self.max_input_chars_per_word:
+                output_tokens.append(self.unk_token)
+                continue
+
+            is_bad = False
+            start = 0
+            sub_tokens = []
+            while start < len(chars):
+                end = len(chars)
+                cur_substr = None
+                while start < end:
+                    substr = "".join(chars[start:end])
+                    if start > 0:
+                        substr = "##" + substr
+                    if substr in self.vocab:
+                        cur_substr = substr
+                        break
+                    end -= 1
+                if cur_substr is None:
+                    is_bad = True
+                    break
+                sub_tokens.append(cur_substr)
+                start = end
+
+            if is_bad:
+                output_tokens.append(self.unk_token)
+            else:
+                output_tokens.extend(sub_tokens)
+        return output_tokens
