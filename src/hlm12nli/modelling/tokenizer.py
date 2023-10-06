@@ -1,7 +1,7 @@
 # Python Built-in Modules
 import json
 import pathlib
-from typing import Dict
+from typing import Dict, List
 
 
 class Hlm12NliTokenizer:
@@ -47,13 +47,13 @@ class Hlm12NliTokenizer:
             return json.load(fh)
 
     def tokenize(self, text, split_special_tokens=False):
-        # whitespace tokenisation
-        text = text.strip()
-        if not text:
-            return []
-        tokens = text.split()
+        tokens = self._tokenize_by_whitespace(text)
+        return self._wordpiece(tokens)
 
-        # wordpiece tokenisation
+    def _tokenize_by_whitespace(self, text: str) -> List[str]:
+        return text.strip().split() if text else []
+
+    def _wordpiece(self, tokens: List[str]) -> List[str]:
         output_tokens = []
         for token in tokens:
             chars = list(token)
