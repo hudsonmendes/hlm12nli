@@ -4,7 +4,7 @@ import pathlib
 from typing import Dict
 
 
-class Hlm12NliTokenizerVocabReader:
+class Hlm12NliTokeniserVocabReader:
     """
     Reads the vocabulary from a JSON file, postprocessing it
     should it require lowercasing.
@@ -17,7 +17,7 @@ class Hlm12NliTokenizerVocabReader:
 
     def __init__(self, filepath: pathlib.Path) -> None:
         """
-        Constructs a new Hlm12NliTokenizerVocabReader.
+        Constructs a new Hlm12NliTokeniserVocabReader.
 
         Args:
             filepath: The path to the JSON file containing the vocabulary.
