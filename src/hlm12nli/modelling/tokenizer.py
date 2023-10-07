@@ -29,14 +29,14 @@ class Hlm12NliTokenizer:
 
     def __init__(
         self,
-        vocab: Dict[str, int],
+        vocab: Dict[str, int] | List[str],
         do_lowercase=True,
-        seq_len=int | str,
-        max_seq_len=1024,
-        oov_token="[OOV]",
-        pad_token="[PAD]",
-        str_token="[STR]",
-        end_token="[END]",
+        seq_len: int | None = None,
+        max_seq_len: int = 1024,
+        oov_token: int = "[OOV]",
+        pad_token: int = "[PAD]",
+        str_token: int = "[STR]",
+        end_token: int = "[END]",
     ):
         """
         Constructs a new Hlm12NliTokenizer.
@@ -59,13 +59,13 @@ class Hlm12NliTokenizer:
         self.token_str = str_token
         self.token_end = end_token
         self.special_tokens = [self.token_oov, self.token_pad, self.token_str, self.token_end]
-        self.vocab = vocab
+        self.vocab = vocab if isinstance(vocab, dict) else {token: i for i, token in enumerate(vocab)}
         self._ensure_seq_length_constraints(self.seq_len, self.max_seq_len)
         self._ensure_respects_casing(self.vocab, do_lowercase=self.do_lowercase, ignore=self.special_tokens)
         self._ensure_special_tokens_in_vocab(self.vocab, special_tokens=self.special_tokens)
 
     @staticmethod
-    def _ensure_seq_length_constraints(seq_len: int | str, max_seq_len: int) -> None:
+    def _ensure_seq_length_constraints(seq_len: int, max_seq_len: int) -> None:
         if seq_len is not None and seq_len > max_seq_len:
             raise Hlm12NliTokenizerSeqLenError(seq_len=seq_len, max_seq_len=max_seq_len)
 
@@ -80,18 +80,22 @@ class Hlm12NliTokenizer:
     def _ensure_special_tokens_in_vocab(vocab: Dict[str, int], special_tokens: List[str]) -> None:
         for token in special_tokens:
             if token not in vocab:
-                raise Hlm12NliTokenizerMissingSpecialTokenInVocab(token=token)
+                raise Hlm12NliTokenizerMissingSpecialTokenInVocabError(token=token)
 
-    def tokenize(self, x: List[str] | str) -> List[str]:
-        single = False
+    @staticmethod
+    def _ensure_batch(x: List[str]) -> None:
         if not isinstance(x, list):
-            x = [x]
-            single = True
+            raise Hlm12NliTokenizerBatchRequiredError()
+
+    def tokenize(self, x: List[str]) -> List[List[str]]:
+        self._ensure_batch(x)
+        if self.do_lowercase:
+            x = [xi.lower() for xi in x]
         y = [self._tokenize_by_whitespace(xi) for xi in x]
         y = [self._wordpiece(yi) for yi in y]
         y = [self._envelop(yi) for yi in y]
         y = self._pad(y)
-        return y[0] if single else y
+        return y
 
     def _tokenize_by_whitespace(self, text: str) -> List[str]:
         return text.strip().split() if text else []
@@ -138,6 +142,11 @@ class Hlm12NliTokenizerError(Exception, ABC):
     pass
 
 
+class Hlm12NliTokenizerBatchRequiredError(Hlm12NliTokenizerError):
+    def __init__(self):
+        super().__init__("The tokenizer has been designed to work with batches, but a single input was given.")
+
+
 class Hlm12NliTokenizerSeqLenError(Hlm12NliTokenizerError):
     def __init__(self, seq_len: int, max_seq_len: int):
         super().__init__(f"The sequence length {seq_len} is greater than the maximum sequence length {max_seq_len}.")
@@ -148,6 +157,6 @@ class Hlm12NliTokenizerVocabTokenCasingError(Hlm12NliTokenizerError):
         super().__init__(f"The token '{token}' is not lowercase, but the tokenizer is set to lowercase tokens.")
 
 
-class Hlm12NliTokenizerMissingSpecialTokenInVocab(Hlm12NliTokenizerError):
+class Hlm12NliTokenizerMissingSpecialTokenInVocabError(Hlm12NliTokenizerError):
     def __init__(self, token: str):
         super().__init__(f"The special token '{token}' is not in the vocabulary.")
