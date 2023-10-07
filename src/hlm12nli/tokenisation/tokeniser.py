@@ -88,7 +88,7 @@ class Hlm12NliTokeniser:
         if not isinstance(x, list):
             raise Hlm12NliTokeniserBatchRequiredError()
 
-    def tokenize(self, x: List[str]) -> List[List[str]]:
+    def split(self, x: List[str]) -> List[List[str]]:
         self._ensure_batch(x)
         if self.do_lowercase:
             x = [xi.lower() for xi in x]
