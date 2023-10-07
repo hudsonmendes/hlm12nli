@@ -2,10 +2,15 @@
 import unittest
 
 # My Packages and Modules
-from hlm12nli.modelling.tokeniser import Hlm12NliTokeniser, Hlm12NliTokeniserBatchRequiredError
+from hlm12nli.tokenisation.tokeniser import (
+    Hlm12NliTokeniser,
+    Hlm12NliTokeniserBatchRequiredError,
+    Hlm12NliTokeniserSeqLenError,
+    Hlm12NliTokeniserVocabTokenCasingError,
+)
 
 
-class TestHlm12NliTokeniser(unittest.TestCase):
+class Hlm12NliTokeniserIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.vocab = ["[PAD]", "[OOV]", "[STR]", "[END]", "A", "test", "sentence", "##.", "Hudson", "##'s"]
         self.tokeniser = Hlm12NliTokeniser(vocab=self.vocab, do_lowercase=False)
@@ -14,6 +19,14 @@ class TestHlm12NliTokeniser(unittest.TestCase):
         t1 = Hlm12NliTokeniser(vocab=self.vocab, do_lowercase=False)
         t2 = Hlm12NliTokeniser(vocab={token: i for i, token in enumerate(self.vocab)}, do_lowercase=False)
         self.assertEqual(t1.vocab, t2.vocab)
+
+    def test_ctor_fails_if_seq_len_greater_than_max_seq_len(self):
+        with self.assertRaises(Hlm12NliTokeniserSeqLenError):
+            Hlm12NliTokeniser(vocab=self.vocab, seq_len=1025, max_seq_len=1024)
+
+    def test_ctor_fails_if_token_not_lowercase(self):
+        with self.assertRaises(Hlm12NliTokeniserVocabTokenCasingError):
+            Hlm12NliTokeniser(vocab=self.vocab + ["NotLowercase"], do_lowercase=True)
 
     def test_tokenize_requires_batch(self):
         with self.assertRaises(Hlm12NliTokeniserBatchRequiredError):
@@ -61,6 +74,6 @@ class TestHlm12NliTokeniser(unittest.TestCase):
     def test_tokenize_and_join_without_special_tokens_match(self):
         test_sentence = ["A Hudson's test sentence."]
         expected_output = ["A Hudson's test sentence."]
-        batch_tokenized = self.tokeniser.tokenize([test_sentence])
-        actual_output = self.tokeniser.untokenize(batch_tokenized)
+        batch_tokenized = self.tokeniser.tokenize(test_sentence)
+        actual_output = self.tokeniser.join(batch_tokenized)
         self.assertEqual(actual_output, expected_output)
