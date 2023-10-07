@@ -12,6 +12,13 @@ class Hlm12NliTokeniserJoiner:
     expr_subword: str
 
     def __init__(self, special_tokens: List[str], expr_subword: str) -> None:
+        """
+        Constructs a new instance of Hlm12NliTokeniserJoiner.
+
+        Args:
+            special_tokens: The special tokens to ignore.
+            expr_subword: The subword to join to the previous token.
+        """
         self.special_tokens = special_tokens
         self.expr_subword = expr_subword
 
@@ -23,6 +30,9 @@ class Hlm12NliTokeniserJoiner:
         Args:
             x: The subtokens to join.
             ignore_special_tokens: Whether to ignore special tokens, default is False.
+
+        Returns:
+            The sentence representing the joined tokens, with or without special tokens.
         """
         y = self._glue_subtokens_to_tokens(x)
         if ignore_special_tokens:

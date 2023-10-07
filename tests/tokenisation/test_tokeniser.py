@@ -72,8 +72,15 @@ class Hlm12NliTokeniserIntegrationTest(unittest.TestCase):
         self.assertEqual(self.tokeniser.tokenize([test_sentence])[0], expected_output)
 
     def test_tokenize_and_join_without_special_tokens_match(self):
-        test_sentence = ["A Hudson's test sentence."]
-        expected_output = ["A Hudson's test sentence."]
+        test_sentence = ["A Hudson's test sentence.", "test"]
+        expected_output = ["A Hudson's test sentence.", "test"]
         batch_tokenized = self.tokeniser.tokenize(test_sentence)
         actual_output = self.tokeniser.join(batch_tokenized)
+        self.assertEqual(actual_output, expected_output)
+
+    def test_tokenize_and_join_with_special_tokens_match(self):
+        test_sentence = ["A Hudson's test sentence.", "test"]
+        expected_output = ["[STR] A Hudson's test sentence. [END]", "[STR] test [END] [PAD] [PAD] [PAD] [PAD] [PAD]"]
+        batch_tokenized = self.tokeniser.tokenize(test_sentence)
+        actual_output = self.tokeniser.join(batch_tokenized, ignore_special_tokens=False)
         self.assertEqual(actual_output, expected_output)
