@@ -10,7 +10,11 @@ readme = "README.md"
 license = { file = "LICENSE" }
 urls = { homepage = "https://github.com/hudsonmendes/hlm12nli" }
 keywords = ["nlu", "snli", "sentence-embeddings"]
-dependencies = ["torch>=2.0.1", "transformers>=4.33.1"]
+dependencies = [
+    "torch>=2.0.1",
+    "transformers>=4.33.1",
+    "hlm12ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/hlm12ml",
+]
 
 [project.optional-dependencies]
 dev = ["pre-commit>=3.3.3", "black[jupyter]>=23.7.0", "isort>=5.12.0"]

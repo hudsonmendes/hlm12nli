@@ -20,25 +20,25 @@ class Hlm12NliTokeniserSplitter:
     """
 
     vocab: Dict[str, int]
-    expr_subtoken: str
+    expr_subword: str
     token_oov: str
 
     def __init__(
         self,
         vocab: Dict[str, int],
         token_oov: str,
-        expr_subtoken: str,
+        expr_subword: str,
     ) -> None:
         """
         Constructs a new Hlm12NliTokeniserSplitter.
 
         Args:
             vocab: The vocabulary to use.
-            expr_subtoken: The expression for the subtoken, default is "##".
+            expr_subword: The expression for the subtoken, default is "##".
             token_oov: The out-of-vocabulary token, default is "[OOV]".
         """
         self.vocab = vocab
-        self.expr_subtoken = expr_subtoken
+        self.expr_subword = expr_subword
         self.token_oov = token_oov
 
     def __call__(self, x: List[str]) -> List[str]:
@@ -71,7 +71,7 @@ class Hlm12NliTokeniserSplitter:
                 while start < end:
                     substr = "".join(chars[start:end])
                     if start > 0:
-                        substr = self.expr_subtoken + substr
+                        substr = self.expr_subword + substr
                     if substr in self.vocab:
                         cur_substr = substr
                         break
