@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "hlm12nli"
+version = "0.0.1"
+authors = [{ name = "Hudson Mendes", email = "hlm12@student.london.ac.uk" }]
+description = "NLI model trained on the SNLI dataset using triplet loss."
+readme = "README.md"
+license = { file = "LICENSE" }
+urls = { homepage = "https://github.com/hudsonmendes/hlm12nli" }
+keywords = ["nlu", "snli", "sentence-embeddings"]
+dependencies = [
+    "torch>=2.0.1",
+    "transformers>=4.33.1",
+    "nest-ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/nest-ml",
+]
+
+[project.optional-dependencies]
+dev = ["pre-commit>=3.3.3", "black[jupyter]>=23.7.0", "isort>=5.12.0"]
+test = ["pytest>=7.4.0", "hypothesis>=6.84.2"]
+etl = []
+tokenisation = []
+modelling = []
+training = []
+serving = []
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+src_paths = ["dev", "src", "tests"]
+known_third_party = ["torch"]
+known_first_party = ["nest-ml"]
+import_heading_stdlib = "Python Built-in Modules"
+import_heading_thirdparty = "Third-Party Libraries"
+import_heading_firstparty = "My Packages and Modules"
+import_heading_localfolder = "Local Folders"
