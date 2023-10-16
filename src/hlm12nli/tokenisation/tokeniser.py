@@ -2,7 +2,7 @@
 from typing import List
 
 # Third-Party Libraries
-from hlm12ml.text import Hlm12TextTokeniserBase
+from nest_ml.text import NestMLTextTokeniserBase
 
 # Local Folders
 from .config import Hlm12NliTextTokeniserConfig
@@ -11,11 +11,11 @@ from .output import Hlm12NliTokeniserOutput
 from .splitter import Hlm12NliTokeniserSplitter
 
 
-class Hlm12NliTokeniser(Hlm12TextTokeniserBase[Hlm12NliTextTokeniserConfig, Hlm12NliTokeniserOutput]):
+class Hlm12NliTokeniser(NestMLTextTokeniserBase[Hlm12NliTextTokeniserConfig, Hlm12NliTokeniserOutput]):
     """
     Tokeniser for the Hlm12Nli model, implemented using the wordpiece algorithm
     with padding, truncating and special tokens capabilities.
-    Inherits from `Hlm12TextTokeniserBase`.
+    Inherits from `NestMLTextTokeniserBase`.
 
     Attributes:
         max_seq_len: int
@@ -58,7 +58,6 @@ class Hlm12NliTokeniser(Hlm12TextTokeniserBase[Hlm12NliTextTokeniserConfig, Hlm1
             expr_subword=config.expr_subword,
         )
         self._joiner_fn = Hlm12NliTokeniserJoiner(
-            special_tokens=config.special_tokens,
             expr_subword=config.expr_subword,
         )
 

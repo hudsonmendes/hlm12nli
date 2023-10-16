@@ -38,3 +38,7 @@ class Hlm12NliTextTokeniserConfig(Hlm12TextTokeniserConfigBase):
     token_end: str = field(default="[END]")
     expr_subword: str = field(default="##")
     do_lowercase: bool = field(default=True)
+
+    def __post_init__(self):
+        self.special_tokens.add(self.token_str)
+        self.special_tokens.add(self.token_end)

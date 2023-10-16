@@ -44,27 +44,30 @@ class Hlm12NliTokeniserIntegrationTest(unittest.TestCase):
         actual_input_ids = self.tokeniser.tokenise([test_sentence]).input_ids
         self.assertEqual(actual_input_ids[0].tolist(), expected_input_ids)
 
-    def test_reverse_special_tokens_match(self):
+    def test_reverse_matches(self):
         test_input = ["A Hudson's test sentence.", "test"]
         tokenised_input_ids = self.tokeniser.tokenise(test_input).input_ids
         reversed_tokens = self.tokeniser.reverse(tokenised_input_ids)
         self.assertEqual(reversed_tokens, test_input)
 
-    def test_tokenise_and_join_with_special_tokens_match(self):
+    def test_reverse_with_special_tokens_matches(self):
         test_input = ["A Hudson's test sentence.", "test"]
         expected_output = ["[STR] A Hudson's test sentence. [END]", "[STR] test [END] [PAD] [PAD] [PAD] [PAD] [PAD]"]
-        batch_tokenized = self.tokeniser.split(test_input)
-        actual_output = self.tokeniser.join(batch_tokenized, ignore_special_tokens=False)
+        batch_tokenized = self.tokeniser.tokenise(test_input).input_ids
+        actual_output = self.tokeniser.reverse(batch_tokenized, ignore_special_tokens=False)
         self.assertEqual(actual_output, expected_output)
 
-    def test_encode_produces_correct_input_ids(self):
+    def test_call_produces_correct_input_ids(self):
         test_input = ["A Hudson's test sentence.", "test"]
-        expected_input_ids = [[3, 4, 8, 9, 10, 7], [3, 5, 7, 0, 0, 0, 0, 0]]
-        actual_input_ids = self.tokeniser(test_input).input_ids
+        expected_input_ids = [[2, 4, 8, 9, 5, 6, 7, 3], [2, 5, 3, 0, 0, 0, 0, 0]]
+        actual_input_ids = self.tokeniser(test_input).input_ids.tolist()
         self.assertEqual(actual_input_ids, expected_input_ids)
 
-    def test_encode_produces_correct_attention_mask(self):
+    def test_call_produces_correct_input_mask(self):
         test_input = ["A Hudson's test sentence.", "test"]
-        expected_input_ids = [[1, 1, 1, 1, 1, 1], [1, 1, 1, 0, 0, 0, 0, 0]]
-        actual_input_ids = self.tokeniser(test_input)["input_ids"]
-        self.assertEqual(actual_input_ids, expected_input_ids)
+        expected_input_mask = [
+            [True, True, True, True, True, True, True, True],
+            [True, True, True, False, False, False, False, False],
+        ]
+        actual_input_mask = self.tokeniser(test_input).input_mask.tolist()
+        self.assertEqual(actual_input_mask, expected_input_mask)

@@ -13,7 +13,7 @@ keywords = ["nlu", "snli", "sentence-embeddings"]
 dependencies = [
     "torch>=2.0.1",
     "transformers>=4.33.1",
-    "hlm12ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/hlm12ml",
+    "nest-ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/nest-ml",
 ]
 
 [project.optional-dependencies]
@@ -33,7 +33,7 @@ profile = "black"
 line_length = 120
 src_paths = ["dev", "src", "tests"]
 known_third_party = ["torch"]
-known_first_party = ["hlm12erc"]
+known_first_party = ["nest-ml"]
 import_heading_stdlib = "Python Built-in Modules"
 import_heading_thirdparty = "Third-Party Libraries"
 import_heading_firstparty = "My Packages and Modules"
