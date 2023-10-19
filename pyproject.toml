@@ -11,7 +11,7 @@ license = { file = "LICENSE" }
 urls = { homepage = "https://github.com/hudsonmendes/hlm12nli" }
 keywords = ["sentence-embeddings", "snli"]
 dependencies = [
-    "torch>=2.0.1",
+    "lightning>=2.1.0",
     "nest-ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/nest-ml",
 ]
 
