@@ -10,11 +10,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 urls = { homepage = "https://github.com/hudsonmendes/hlm12nli" }
 keywords = ["nlu", "snli", "sentence-embeddings"]
-dependencies = [
-    "torch>=2.0.1",
-    "transformers>=4.33.1",
-    "nest-ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/nest-ml",
-]
+dependencies = ["lightning>=2.1.0"]
 
 [project.optional-dependencies]
 dev = ["pre-commit>=3.3.3", "black[jupyter]>=23.7.0", "isort>=5.12.0"]
@@ -32,8 +28,8 @@ line-length = 120
 profile = "black"
 line_length = 120
 src_paths = ["dev", "src", "tests"]
-known_third_party = ["torch"]
-known_first_party = ["nest-ml"]
+known_third_party = ["lightning", "torch"]
+known_first_party = [""]
 import_heading_stdlib = "Python Built-in Modules"
 import_heading_thirdparty = "Third-Party Libraries"
 import_heading_firstparty = "My Packages and Modules"

@@ -8,4 +8,4 @@ import torch
 @dataclass(frozen=True)
 class Hlm12NliTokeniserOutput:
     input_ids: torch.LongTensor
-    attention_mask: torch.BoolTensor
+    input_mask: torch.BoolTensor
