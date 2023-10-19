@@ -4,15 +4,14 @@ requires = ["setuptools", "wheel"]
 [project]
 name = "hlm12nli"
 version = "0.0.1"
-authors = [{ name = "Hudson Mendes", email = "hlm12@student.london.ac.uk" }]
-description = "NLI model trained on the SNLI dataset using triplet loss."
+authors = [{ name = "Hudson Mendes", email = "hudsonmendes@gmail.com" }]
+description = "Sentence Embeddings encoder model trained on the SNLI dataset using triplet loss."
 readme = "README.md"
 license = { file = "LICENSE" }
 urls = { homepage = "https://github.com/hudsonmendes/hlm12nli" }
-keywords = ["nlu", "snli", "sentence-embeddings"]
+keywords = ["sentence-embeddings", "snli"]
 dependencies = [
     "torch>=2.0.1",
-    "transformers>=4.33.1",
     "nest-ml@file:///Users/hudsonmendes/Workspaces/hudsonmendes/nest-ml",
 ]
 

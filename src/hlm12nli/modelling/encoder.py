@@ -1,12 +1,12 @@
 # Third-Party Libraries
 import torch
-import transformers
+from nest_ml.text import NestMLTextEncoderModelBase
 
 # Local Folders
 from .config import Hlm12NliConfig
 
 
-class Hlm12NliEncoder(transformers.PreTrainedModel):
+class Hlm12NliEncoder(NestMLTextEncoderModelBase):
     def __init__(self, config: Hlm12NliConfig):
         self.embeddings = torch.nn.Embedding(
             num_embeddings=config.vocab_size,

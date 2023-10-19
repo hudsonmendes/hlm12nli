@@ -2,14 +2,14 @@
 from dataclasses import dataclass, field
 
 # Third-Party Libraries
-from hlm12ml.text import Hlm12TextTokeniserConfigBase
+from nest_ml.text import NestMLTextTokeniserConfigBase
 
 
 @dataclass(frozen=True)
-class Hlm12NliTextTokeniserConfig(Hlm12TextTokeniserConfigBase):
+class Hlm12NliTextTokeniserConfig(NestMLTextTokeniserConfigBase):
     """
     Configuration for the HLM12 NLI text tokeniser.
-    Inherits from the base `Hlm12TextTokeniserConfigBase` and all its fields.
+    Inherits from the base `NestMLTextTokeniserConfigBase` and all its fields.
 
     Attributes:
         max_seq_len: int
