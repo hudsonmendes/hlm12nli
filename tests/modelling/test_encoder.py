@@ -5,7 +5,7 @@ import unittest
 import torch
 
 # My Packages and Modules
-from hlm12nli.modelling.config import Hlm12NliConfig
+from hlm12nli.modelling.config import Hlm12NliEncoderConfig
 from hlm12nli.modelling.encoder import Hlm12NliEncoder
 from hlm12nli.tokenisation import Hlm12NliTokeniserOutput
 
@@ -13,7 +13,7 @@ from hlm12nli.tokenisation import Hlm12NliTokeniserOutput
 class IntegrationTestHlm12NliEncoder(unittest.TestCase):
     def setUp(self):
         self.encoder = Hlm12NliEncoder(
-            config=Hlm12NliConfig(
+            config=Hlm12NliEncoderConfig(
                 vocab_size=10,
                 token_vec_dims=16,
                 token_id_pad=0,

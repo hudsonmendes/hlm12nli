@@ -1,5 +1,6 @@
 # Python Built-in Modules
 from dataclasses import dataclass, field
+from typing import Dict, List, Union
 
 
 @dataclass(frozen=True)
@@ -34,7 +35,7 @@ class Hlm12NliTextTokeniserConfig:
     max_seq_len: int = field(default=1024)
     seq_len: int = field(default=None)
     special_tokens: set = field(default_factory=set)
-    vocab: dict = field(default_factory=dict)
+    vocab: List[str] | Dict[str, int] = field(default_factory=dict)
     token_pad: str = field(default="[PAD]")
     token_oov: str = field(default="[OOV]")
     token_str: str = field(default="[STR]")

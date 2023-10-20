@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class Hlm12NliConfig:
+class Hlm12NliEncoderConfig:
     vocab_size: int
     token_vec_dims: int
     token_id_pad: int

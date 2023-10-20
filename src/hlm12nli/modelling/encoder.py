@@ -2,7 +2,7 @@
 import torch
 
 # Local Folders
-from .config import Hlm12NliConfig
+from .config import Hlm12NliEncoderConfig
 
 
 class Hlm12NliEncoder(torch.nn.Module):
@@ -29,7 +29,7 @@ class Hlm12NliEncoder(torch.nn.Module):
             The linear layer, learnable, that projects the hidden states into the output space.
     """
 
-    def __init__(self, config: Hlm12NliConfig):
+    def __init__(self, config: Hlm12NliEncoderConfig):
         """
         Constructs the encoder for the HLM12NLI model.
 
