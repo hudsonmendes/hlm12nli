@@ -5,7 +5,7 @@ import unittest
 import torch
 
 # My Packages and Modules
-from hlm12nli.encoder import Hlm12NliConfig, Hlm12NliEncoder
+from hlm12nli.encoding import Hlm12NliConfig, Hlm12NliEncoder
 
 
 class TestEncoder(unittest.TestCase):
