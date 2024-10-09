@@ -11,10 +11,16 @@ from .encoding import Hlm12NliEncoder
 
 def train(encoder: Hlm12NliEncoder):
     dataset = NliDataset.load_sample()
-    data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    data_loader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=3)
     model = Hlm12NliEncoderTrainer(encoder=encoder)
 
-    trainer = pl.Trainer(max_epochs=10, callbacks=[ModelCheckpoint(monitor="train_loss"), TQDMProgressBar()])
+    trainer = pl.Trainer(
+        max_epochs=10,
+        callbacks=[
+            ModelCheckpoint(monitor="train_loss"),
+            TQDMProgressBar(),
+        ],
+    )
     trainer.fit(model, data_loader)
 
 
