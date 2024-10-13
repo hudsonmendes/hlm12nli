@@ -26,6 +26,14 @@ class Hlm12NliTextTokenisation:
     ids: torch.IntTensor
     mask: torch.BoolTensor
 
+    def __len__(self) -> int:
+        return len(self.tokens)
+
+    def __getitem__(self, i: Union[int, slice]) -> "Hlm12NliTextTokenisation":
+        slice_tokens = self.tokens[i] if isinstance(i, int) else [self.tokens[ii] for ii in i]
+        slice_ids, slice_mask = self.ids[i], self.mask[i]
+        return Hlm12NliTextTokenisation(tokens=slice_tokens, ids=slice_ids, mask=slice_mask)
+
 
 class Hlm12NliTextTokeniser:
     config: Hlm12NliTextTokeniserConfig
