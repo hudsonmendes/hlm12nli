@@ -1,3 +1,6 @@
+# Python Built-in Modules
+from dataclasses import dataclass, field
+
 # Third-Party Libraries
 import pytorch_lightning as pl
 import torch
@@ -7,13 +10,24 @@ from torch.utils.data import DataLoader
 # Local Folders
 from .data import NliDataset
 from .encoding import Hlm12NliEncoder
+from .tokenisation import Hlm12NliTextTokeniser
 
 
-def train(encoder: Hlm12NliEncoder):
-    dataset = NliDataset.load_sample()
-    data_loader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=3)
+@dataclass(frozen=True)
+class Hlm12NliHyperparameters:
+    batch_size: int = 32
+    max_epochs: int = 10
+    learning_rate: float = 1e-3
+    num_workers: int = 3
+
+
+def train(
+    tokeniser: Hlm12NliTextTokeniser,
+    encoder: Hlm12NliEncoder,
+    datasplit: NliDataset,
+):
+    data_loader = DataLoader(datasplit, batch_size=32, shuffle=True, num_workers=3)
     model = Hlm12NliEncoderTrainer(encoder=encoder)
-
     trainer = pl.Trainer(
         max_epochs=10,
         callbacks=[

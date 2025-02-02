@@ -12,7 +12,7 @@ from hlm12nli.tokenisation import Hlm12NliTextTokenisation
 class TestEncoder(unittest.TestCase):
     def setUp(self) -> None:
         self.subject = Hlm12NliEncoder(
-            config=Hlm12NliConfig(
+            hyperparams=Hlm12NliConfig(
                 n_vocab=10,
                 dim_embed=3,
                 dim_lstm=16,

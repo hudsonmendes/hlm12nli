@@ -1,74 +1,56 @@
 # Python Built-in Modules
-from dataclasses import dataclass, field
-from typing import Dict, List, Union
+from dataclasses import dataclass
+from typing import Union
 
 # Third-Party Libraries
 import torch
 
-
-@dataclass(frozen=True)
-class Hlm12NliTextTokeniserConfig:
-    vocab: List[str] = field(default_factory=list)
-    seqlen: int = field(default=128)
-    token_start: str = field(default="<start>")
-    token_end: str = field(default="<end>")
-    token_pad: str = field(default="<pad>")
-    token_oov: str = field(default="<oov>")
-
-    def __post_init__(self):
-        special_tokens = (self.token_start, self.token_end, self.token_pad, self.token_oov)
-        assert all(t in self.vocab for t in special_tokens), "All special tokens must be in the vocabulary"
+# Local Folders
+from .hyperparams import Hlm12NliHyperparams
 
 
 @dataclass(frozen=True)
 class Hlm12NliTextTokenisation:
-    tokens: List[List[str]]
+    tokens: list[list[str]]
     ids: torch.IntTensor
     mask: torch.BoolTensor
 
-    def __len__(self) -> int:
-        return len(self.tokens)
-
-    def __getitem__(self, i: Union[int, slice]) -> "Hlm12NliTextTokenisation":
-        slice_tokens = self.tokens[i] if isinstance(i, int) else [self.tokens[ii] for ii in i]
-        slice_ids, slice_mask = self.ids[i], self.mask[i]
-        return Hlm12NliTextTokenisation(tokens=slice_tokens, ids=slice_ids, mask=slice_mask)
-
 
 class Hlm12NliTextTokeniser:
-    config: Hlm12NliTextTokeniserConfig
-    token_to_tid: Dict[str, int]
+    hyperparams: Hlm12NliHyperparams
+    token_to_tid: dict[str, int]
+    tid_to_token: dict[int, str]
 
-    def __init__(self, config: Hlm12NliTextTokeniserConfig):
-        self.config = config
-        self.token_to_tid = dict((token, tid) for (tid, token) in enumerate(config.vocab))
-        self.tid_to_token = dict((tid, token) for (tid, token) in enumerate(config.vocab))
+    def __init__(self, hyperparams: Hlm12NliHyperparams):
+        self.hyperparams = hyperparams
+        self.token_to_tid = dict((token, tid) for (tid, token) in enumerate(hyperparams.tokeniser.vocab))
+        self.tid_to_token = dict((tid, token) for (tid, token) in enumerate(hyperparams.tokeniser.vocab))
 
-    def __call__(self, x: Union[str, List[str]]) -> Hlm12NliTextTokenisation:
+    def __call__(self, x: Union[str, list[str]]) -> Hlm12NliTextTokenisation:
         return self.tokenise(x=x)
 
-    def tokenise(self, x: Union[str, List[str]]) -> Hlm12NliTextTokenisation:
-        start, end = self.config.token_start, self.config.token_end
-        pad, oov = self.config.token_pad, self.config.token_oov
+    def tokenise(self, x: Union[str, list[str]]) -> Hlm12NliTextTokenisation:
+        start, end = self.hyperparams.tokeniser.token_start, self.hyperparams.tokeniser.token_end
+        pad, oov = self.hyperparams.tokeniser.token_pad, self.hyperparams.tokeniser.token_oov
         oovid = self.token_to_tid.get(oov)
         tokens = self._tokenise(x)
         tokens = [[start] + ts + [end] for ts in tokens]
-        tokens = [ts + [pad] * (self.config.seqlen - len(ts)) for ts in tokens]
-        tokens = [ts[: self.config.seqlen] for ts in tokens]
+        tokens = [ts + [pad] * (self.hyperparams.tokeniser.seqlen - len(ts)) for ts in tokens]
+        tokens = [ts[: self.hyperparams.tokeniser.seqlen] for ts in tokens]
         return Hlm12NliTextTokenisation(
             tokens=tokens,
             ids=torch.IntTensor([[self.token_to_tid.get(t, oovid) for t in ts] for ts in tokens]),
             mask=torch.BoolTensor([[t != pad for t in ts] for ts in tokens]),
         )
 
-    def detokenise(self, y: Union[List[str], List[List[str]], torch.IntTensor]) -> Union[str, List[str]]:
+    def detokenise(self, y: Union[list[str], list[list[str]], torch.IntTensor]) -> Union[str, list[str]]:
         if isinstance(y, torch.IntTensor):
-            seqs: List[List[int]] = y.tolist()
+            seqs: list[list[int]] = y.tolist()
             y = [[self.tid_to_token.get(yii, "") for yii in yi] for yi in seqs]
         return self._join(y=y)
 
     @staticmethod
-    def _tokenise(x: Union[str, List[str]]) -> List[List[str]]:
+    def _tokenise(x: Union[str, list[str]]) -> list[list[str]]:
         if not isinstance(x, list):
             x = [x if not isinstance(x, str) else str(x)]
         seqs = []
@@ -89,13 +71,13 @@ class Hlm12NliTextTokeniser:
         return seqs
 
     @staticmethod
-    def _join(y: Union[List[str], List[List[str]]]) -> Union[str, List[str]]:
+    def _join(y: Union[list[str], list[list[str]]]) -> Union[str, list[str]]:
         single = False
         if isinstance(y, list) and len(y) > 0 and not isinstance(y[0], list):
             single = True
             y = [[yi if isinstance(yi, str) else str(yi) for yi in y]]
 
-        seqs: List[str] = []
+        seqs: list[str] = []
         for tokens in y:
             s = ""
             for token in tokens:

@@ -31,21 +31,21 @@ class TestTokeniser(unittest.TestCase):
 
     def test_tokenise_tokens(self):
         x = "I'm groot bam!"
-        y = [self.tokeniser.config.token_start, "I", "##'m", "groot", "bam", "##!", self.tokeniser.config.token_end]
-        y += [self.tokeniser.config.token_pad] * (self.tokeniser.config.seqlen - len(y))
+        y = [self.tokeniser.hyperparams.token_start, "I", "##'m", "groot", "bam", "##!", self.tokeniser.hyperparams.token_end]
+        y += [self.tokeniser.hyperparams.token_pad] * (self.tokeniser.hyperparams.seqlen - len(y))
         self.assertListEqual(self.tokeniser.tokenise(x=[x]).tokens, [y])
         self.assertListEqual(self.tokeniser.tokenise(x=x).tokens, [y])
 
     def test_tokenise_ids(self):
         x = "I'm groot bam!"
         y = [0, 4, 5, 6, 3, 7, 1]
-        y += [2] * (self.tokeniser.config.seqlen - len(y))
+        y += [2] * (self.tokeniser.hyperparams.seqlen - len(y))
         self.assertListEqual(self.tokeniser.tokenise(x=[x]).ids.tolist(), [y])
         self.assertListEqual(self.tokeniser.tokenise(x=x).ids.tolist(), [y])
 
     def test_tokenise_mask(self):
         x = "I'm groot bam!"
         y = [True, True, True, True, True, True, True]
-        y += [False] * (self.tokeniser.config.seqlen - len(y))
+        y += [False] * (self.tokeniser.hyperparams.seqlen - len(y))
         self.assertListEqual(self.tokeniser.tokenise(x=[x]).mask.tolist(), [y])
         self.assertListEqual(self.tokeniser.tokenise(x=x).mask.tolist(), [y])
