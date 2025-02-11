@@ -6,48 +6,63 @@ from typing import Union
 import torch
 
 # Local Folders
-from .hyperparams import Hlm12NliHyperparams
+from .hyperparams import Hlm12NliHyperparams, Hlm12NliTokeniserHyperparams
 
 
 @dataclass(frozen=True)
-class Hlm12NliTextTokenisation:
-    tokens: list[list[str]]
+class Hlm12NliTokenisation:
+    tokens: Union[list[list[str]], list[str]]
     ids: torch.IntTensor
     mask: torch.BoolTensor
 
+    def __getitem__(self, idx: Union[int, slice]) -> "Hlm12NliTokenisation":
+        return Hlm12NliTokenisation(
+            tokens=self.tokens[idx],
+            ids=self.ids[idx].type(torch.IntTensor),
+            mask=self.mask[idx].type(torch.BoolTensor),
+        )
 
-class Hlm12NliTextTokeniser:
-    hyperparams: Hlm12NliHyperparams
+    @property
+    def shape(self) -> tuple[int, int]:
+        return len(self.tokens), len(self.tokens[0])
+
+
+class Hlm12NliTokeniser:
+    hyperparams: Hlm12NliTokeniserHyperparams
     token_to_tid: dict[str, int]
     tid_to_token: dict[int, str]
 
     def __init__(self, hyperparams: Hlm12NliHyperparams):
-        self.hyperparams = hyperparams
-        self.token_to_tid = dict((token, tid) for (tid, token) in enumerate(hyperparams.tokeniser.vocab))
-        self.tid_to_token = dict((tid, token) for (tid, token) in enumerate(hyperparams.tokeniser.vocab))
+        self.hyperparams = hyperparams.tokeniser
+        self.token_to_tid = dict((token, tid) for (tid, token) in enumerate(self.hyperparams.vocab))
+        self.tid_to_token = dict((tid, token) for (tid, token) in enumerate(self.hyperparams.vocab))
 
-    def __call__(self, x: Union[str, list[str]]) -> Hlm12NliTextTokenisation:
+    def __call__(self, x: Union[str, list[str]]) -> Hlm12NliTokenisation:
         return self.tokenise(x=x)
 
-    def tokenise(self, x: Union[str, list[str]]) -> Hlm12NliTextTokenisation:
-        start, end = self.hyperparams.tokeniser.token_start, self.hyperparams.tokeniser.token_end
-        pad, oov = self.hyperparams.tokeniser.token_pad, self.hyperparams.tokeniser.token_oov
+    def tokenise(self, x: Union[str, list[str]]) -> Hlm12NliTokenisation:
+        start, end = self.hyperparams.token_start, self.hyperparams.token_end
+        pad, oov = self.hyperparams.token_pad, self.hyperparams.token_oov
         oovid = self.token_to_tid.get(oov)
         tokens = self._tokenise(x)
         tokens = [[start] + ts + [end] for ts in tokens]
-        tokens = [ts + [pad] * (self.hyperparams.tokeniser.seqlen - len(ts)) for ts in tokens]
-        tokens = [ts[: self.hyperparams.tokeniser.seqlen] for ts in tokens]
-        return Hlm12NliTextTokenisation(
+        tokens = [ts + [pad] * (self.hyperparams.seqlen - len(ts)) for ts in tokens]
+        tokens = [ts[: self.hyperparams.seqlen] for ts in tokens]
+        return Hlm12NliTokenisation(
             tokens=tokens,
-            ids=torch.IntTensor([[self.token_to_tid.get(t, oovid) for t in ts] for ts in tokens]),
+            ids=torch.IntTensor([[self.token_to_tid.get(t.lower(), oovid) for t in ts] for ts in tokens]),
             mask=torch.BoolTensor([[t != pad for t in ts] for ts in tokens]),
         )
 
-    def detokenise(self, y: Union[list[str], list[list[str]], torch.IntTensor]) -> Union[str, list[str]]:
+    def detokenise(self, y: Union[list[str], list[list[str]], torch.IntTensor, Hlm12NliTokenisation]) -> Union[str, list[str]]:
+        if isinstance(y, Hlm12NliTokenisation):
+            y = y.ids
         if isinstance(y, torch.IntTensor):
             seqs: list[list[int]] = y.tolist()
+            if isinstance(seqs, list) and len(seqs) > 0 and isinstance(seqs[0], int):
+                seqs = [seqs]
             y = [[self.tid_to_token.get(yii, "") for yii in yi] for yi in seqs]
-        return self._join(y=y)
+        return self._join(y=y, ignored_tokens=self.hyperparams.special_tokens)
 
     @staticmethod
     def _tokenise(x: Union[str, list[str]]) -> list[list[str]]:
@@ -71,7 +86,7 @@ class Hlm12NliTextTokeniser:
         return seqs
 
     @staticmethod
-    def _join(y: Union[list[str], list[list[str]]]) -> Union[str, list[str]]:
+    def _join(y: Union[list[str], list[list[str]]], ignored_tokens: tuple[str, ...]) -> Union[str, list[str]]:
         single = False
         if isinstance(y, list) and len(y) > 0 and not isinstance(y[0], list):
             single = True
@@ -81,7 +96,9 @@ class Hlm12NliTextTokeniser:
         for tokens in y:
             s = ""
             for token in tokens:
-                if token.startswith("##"):
+                if token in ignored_tokens:
+                    continue
+                elif token.startswith("##"):
                     s += token[2:]
                 else:
                     if s and not s.endswith(" "):

@@ -2,12 +2,12 @@
 import unittest
 
 # My Packages and Modules
-from hlm12nli.tokenisation import Hlm12NliTextTokeniser, Hlm12NliTextTokeniserConfig
+from hlm12nli.tokenisation import Hlm12NliTextTokeniserConfig, Hlm12NliTokeniser
 
 
 class TestTokeniser(unittest.TestCase):
     def setUp(self):
-        self.tokeniser = Hlm12NliTextTokeniser(
+        self.tokeniser = Hlm12NliTokeniser(
             config=Hlm12NliTextTokeniserConfig(
                 seqlen=12,
                 vocab=[

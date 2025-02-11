@@ -1,4 +1,5 @@
 # Python Built-in Modules
+import functools
 from dataclasses import dataclass, field
 
 
@@ -7,7 +8,9 @@ class Hlm12NliEncoderHyperparams:
     embed_dim: int = field(default=128)
     lstm_dim: int = field(default=256)
     out_dim: int = field(default=3)
+    lstm_layers: int = field(default=1)
     lstm_bidirectional: bool = field(default=False)
+    lstm_dropout: float = field(default=0)
 
 
 @dataclass(frozen=True)
@@ -20,9 +23,12 @@ class Hlm12NliTokeniserHyperparams:
     token_oov: str = field(default="<oov>")
 
     def __post_init__(self):
-        special_tokens = (self.token_pad, self.token_oov, self.token_end, self.token_start)
-        for token in special_tokens:
+        for token in self.special_tokens:
             self.vocab.insert(0, token)
+
+    @property
+    def special_tokens(self) -> tuple[str, ...]:
+        return (self.token_pad, self.token_oov, self.token_end, self.token_start)
 
 
 @dataclass(frozen=True)
@@ -34,6 +40,6 @@ class Hlm12NliTrainingHyperparams:
 
 @dataclass(frozen=True)
 class Hlm12NliHyperparams:
-    encoder: Hlm12NliEncoderHyperparams = field(default=Hlm12NliEncoderHyperparams())
-    tokeniser: Hlm12NliTokeniserHyperparams = field(default=Hlm12NliTokeniserHyperparams())
-    training: Hlm12NliTrainingHyperparams = field(default=Hlm12NliTrainingHyperparams())
+    encoder: Hlm12NliEncoderHyperparams = field(default_factory=Hlm12NliEncoderHyperparams)
+    tokeniser: Hlm12NliTokeniserHyperparams = field(default_factory=Hlm12NliTokeniserHyperparams)
+    training: Hlm12NliTrainingHyperparams = field(default_factory=Hlm12NliTrainingHyperparams)

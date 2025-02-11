@@ -5,10 +5,10 @@
     ],
     "black-formatter.args": [
         "--line-length",
-        "160"
+        "240"
     ],
     "flake8.args": [
-        "--max-line-length=160"
+        "--max-line-length=240"
     ],
     "python.testing.pytestArgs": [
         "tests"

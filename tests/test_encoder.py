@@ -6,7 +6,7 @@ import torch
 
 # My Packages and Modules
 from hlm12nli.encoding import Hlm12NliConfig, Hlm12NliEncoder
-from hlm12nli.tokenisation import Hlm12NliTextTokenisation
+from hlm12nli.tokenisation import Hlm12NliTokenisation
 
 
 class TestEncoder(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestEncoder(unittest.TestCase):
 
     def test_forward_outputs_1_by_dim_out(self):
         y = self.subject.forward(
-            x=Hlm12NliTextTokenisation(
+            x=Hlm12NliTokenisation(
                 tokens=[["<start>", "I", "##'m", "groot", "bam", "##!", "<end>"]],
                 ids=torch.IntTensor([[0, 4, 5, 6, 3, 7, 1]]),
                 mask=torch.BoolTensor([[True, True, True, True, True, True, True]]),
@@ -32,7 +32,7 @@ class TestEncoder(unittest.TestCase):
 
     def test_forward_outputs_2_by_dim_out(self):
         y = self.subject.forward(
-            x=Hlm12NliTextTokenisation(
+            x=Hlm12NliTokenisation(
                 tokens=[
                     ["<start>", "I", "##'m", "groot", "bam", "##!", "<end>"],
                     ["<start>", "hey", "##!", "<end>", "<pad>", "<pad>", "<pad>"],

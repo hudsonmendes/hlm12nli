@@ -20,11 +20,11 @@ training = ["datasets>=2.20.0"]
 serving = []
 
 [tool.black]
-line-length = 160
+line-length = 240
 
 [tool.isort]
 profile = "black"
-line_length = 160
+line_length = 240
 src_paths = ["dev", "src", "tests"]
 known_third_party = ["lightning", "torch"]
 known_first_party = [""]

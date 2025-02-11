@@ -4,7 +4,7 @@ import unittest
 # My Packages and Modules
 from hlm12nli.encoding import Hlm12NliEncoder
 from hlm12nli.hyperparams import Hlm12NliEncoderHyperparams, Hlm12NliHyperparams, Hlm12NliTokeniserHyperparams, Hlm12NliTrainingHyperparams
-from hlm12nli.tokenisation import Hlm12NliTextTokeniser
+from hlm12nli.tokenisation import Hlm12NliTokeniser
 from hlm12nli.training import train
 
 
@@ -17,7 +17,7 @@ class TestTrainer(unittest.TestCase):
         )
 
     def test_train_updates_parameters(self):
-        tokeniser = Hlm12NliTextTokeniser(hyperparams=self.hyperparams)
+        tokeniser = Hlm12NliTokeniser(hyperparams=self.hyperparams)
         encoder = Hlm12NliEncoder(hyperparams=self.hyperparams)
         before = [p.clone() for p in encoder.parameters()]
         train(encoder=encoder, tokeniser=tokeniser)

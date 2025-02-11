@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 # Local Folders
 from .data import NliDataset
 from .encoding import Hlm12NliEncoder
-from .tokenisation import Hlm12NliTextTokeniser
+from .tokenisation import Hlm12NliTokeniser
 
 
 @dataclass(frozen=True)
@@ -22,7 +22,7 @@ class Hlm12NliHyperparameters:
 
 
 def train(
-    tokeniser: Hlm12NliTextTokeniser,
+    tokeniser: Hlm12NliTokeniser,
     encoder: Hlm12NliEncoder,
     datasplit: NliDataset,
 ):
